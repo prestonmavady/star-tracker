@@ -1,16 +1,17 @@
 # Raspberry Pi
 
-Using an Pi for this implementation is overkill. Since the Pi emulates an FPGA SPI Controller, we restrict ourselves to these rules:
+The need for a Raspberry Pi comes from our Sony IMX290 STARVIS camera module, which only operates with the Pi's CSI camera interface.
+Using a Pi for this implementation _is admittedly overkill_. Since the Pi emulates an FPGA SPI Controller, we restrict ourselves to these rules:
 ```
    starting the loop on boot (using systemd),
    structured as a deterministic pipeline (state machine),
    only using fixed-point math (no floats)
 ```
 
-Boot > Capture Frame (not done) > Greyscale and Preprocess > Extract Centroids > Format SPI-Ready Binary Packet (not done) > SPI TX (not done)
+**Implementation:** Boot > Capture Frame > Greyscale and Preprocess > Extract Centroids > Format SPI-Ready Binary Packet > SPI TX
 
 ### SPI Protocol
-> Our Pi acts as the SPI Controller, and is setup for simplex @ 4MHz
+> Our Pi acts as the SPI Controller (simplex @ 4MHz)
 
 ##### Packet Formatting:
 ```
@@ -23,3 +24,5 @@ Byte   Meaning
 ...    more stars
 N      0x55 (end byte)
 ```
+### To-Do
+Capture Frame Function, Package SPI-Ready Binary Packet Function, SPI TX Setup
