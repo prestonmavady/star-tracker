@@ -11,18 +11,20 @@ Using a Pi for this implementation _is admittedly overkill_. Since the Pi emulat
 **Implementation:** Boot > Capture Frame > Greyscale and Preprocess > Extract Centroids > Format SPI-Ready Binary Packet > SPI TX
 
 ### SPI Protocol
-> Our Pi acts as the SPI Controller (simplex @ 4MHz)
+> Our Pi acts as the SPI Controller (simplex @ 4MHz) through Python's 'spidev' library.
 
 ##### Packet Formatting:
 ```
 Byte   Meaning
 ----   --------
 0xAA   Start byte
-1      Star count (uint16)
-2–3    X1 coord (uint16)
-4–5    Y1 coord (uint16)
+1      Star count (uint32)
+2–5    X1 coord   (uint32)
+6–9    Y1 coord   (uint32)
 ...    more stars
-N      0x55 (end byte)
+407    0x55 (end byte)
 ```
-### To-Do
-Capture Frame Function, Package SPI-Ready Binary Packet Function, SPI TX Setup
+
+##### Transmission Rate:
+We're sending the centroids of the top 100 stars in our image. Each centroid is composed of 8 bytes _(2x 32-bit Fixed-Point Coordinates)_. At 4 MHz that's:
+> 6464 bits / 4,000,000 bits/sec = **1.6ms**
