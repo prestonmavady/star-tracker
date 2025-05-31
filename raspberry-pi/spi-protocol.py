@@ -1,9 +1,15 @@
+# to do:
+# Package centroid array function
+# so centroiding() returns a list of uint8 tuples (x_center, y_center)
+# we want to get the size of the list, append that to our binary buffer, and then append all the tuples
+# i.e. [0x04, 0x12, 0x34, 0xAB, 0xCD]
+
 import spidev
 import struct
 import time
 
 class SPIDevice:
-    def __init__(self, bus=0, device=0, max_speed_hz=1000000, mode=0b00):
+    def __init__(self, bus=0, device=0, max_speed_hz=4000000, mode=0b00):
         self.spi = spidev.SpiDev()
         self.spi.open(bus, device)
         self.spi.max_speed_hz = max_speed_hz
