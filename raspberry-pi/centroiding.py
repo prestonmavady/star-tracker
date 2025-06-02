@@ -1,18 +1,23 @@
-# to do:
-# add headers
-# Capture Frame Function
-# Package SPI-Ready Binary Packet Function
-# SPI TX Setup
+# /star-tracker     rev. 05312025       preston mavady
+# ----------------------------------------------------------
+# Centroiding Algorithm
+#   Optimized for pixel math - high speed and accuracy.
+#   > Contrast Enhancement (brights get brighter,
+#     darks get darker)
+#   > Gaussian Blur To Suppress Noise (random noisy
+#     pixels will get reduced by surrounding dark)
+#   > Adaptive Percentile-based Thresholding
+#     to avoid light pollution/noise.
+#   > Accepts/Rejects Pixels based on Threshold
+#   > Differentiates Stars from Noise and Objects
+#     by checking pixel cluster size.
 
 import cv2
 import numpy as np
 from scipy.ndimage import label
 
-##
-# args:     image
-# returns:  list of float tuples
-##
-def find_centroids(image, threshold=255, min_area=3, max_area=200):
+
+def find_centroids(image, min_area=3, max_area=200):
     # 0. Convert the image to greyscale
     image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     
@@ -20,26 +25,25 @@ def find_centroids(image, threshold=255, min_area=3, max_area=200):
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     image = clahe.apply(image)
 
-    # 2. Slight blur (optional)
+    # 2. Slight Gaussian Blur
     image = cv2.GaussianBlur(image, (3, 3), 0)
 
-    # 3. Threshold
-    percentile = 99  # pick top 2% brightest pixels
+    # 3. Adaptive Thresholding
+    percentile = 99  # pick top 1% brightest pixels
+    # create an adaptive 'brightness' threshold (0-255) from image
     threshold = np.percentile(image, percentile)
     print(f"Using adaptive threshold: {threshold:.2f}")
-
+    # create a binary image based on threshold (sets pixels to either 0 or 255)
     _, binary = cv2.threshold(image, threshold, 255, cv2.THRESH_BINARY)
 
-    # 4. Show binary image for debug
-    cv2.imshow("Thresholded Binary", binary)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-
-    # 5. Connected components
+    # 4. Cluster Detection
+    # define the cluster structure as a 3x3 pixel matrix
+    # > this means a pixel will be checked in all 8 possible directions
     structure = np.ones((3, 3), dtype=np.uint8)
+    # find all the clusters in the binary image
     labeled, num_features = label(binary, structure=structure)
+    # iterate through each cluster, reject if area is too large, append centroids to list
     centroids = []
-
     print(f"Found {num_features} blobs")
     for i in range(1, num_features + 1):
         mask = labeled == i

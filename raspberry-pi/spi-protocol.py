@@ -18,7 +18,7 @@ class SPIDevice:
         self.spi.max_speed_hz = max_speed_hz
         self.spi.mode = mode
         self.spi.bits_per_word = 8
-        print("SPI opened on bus {bus}, device {device}")
+        print(f"SPI opened on bus {bus}, device {device}")
               
     def send_centroids(self, centroids, scale=1000):
         # ------ BUILD PACKET ------
