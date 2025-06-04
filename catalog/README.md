@@ -9,15 +9,15 @@ We hope you find the code to be commented in detail, and well-outlined in the pr
 
 ```
 catalog.csv
-> 256 brightest stars in the Hipparcos catalog as [HIP_ID, RAdeg, DEdeg, and Vmag]
+> contains the 256 brightest stars in the Hipparcos catalog, stored as [HIP_ID, RAdeg, DEdeg, and Vmag]
 
 
 catalog-as-unit-vectors.csv
-> 256 brightest stars in the Hipparcos catalog as [HIP_ID, x, y, z]
+> contains the 256 brightest stars in the Hipparcos catalog, stored as [HIP_ID, x, y, z]
 
 
 pairwise-angles.csv
-> all combinations of star pairs and their calculated vector angle as [ID1, ID2, angle]
+> all combinations of star pairs and their calculated vector angle, stored as [ID1, ID2, angle]
 
 
 binned-catalog.csv
