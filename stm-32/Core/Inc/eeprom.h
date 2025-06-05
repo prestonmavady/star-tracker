@@ -19,6 +19,11 @@
 #include "stm32l4xx.h"
 #ifndef INC_EEPROM_H_
 #define INC_EEPROM_H_
+
+#ifdef __cplusplus
+}
+#endif
+
 // define GPIO ports and pin for I2C configuration
 #define I2C_PORT (GPIOB)
 #define I2C_SCL  (GPIO_PIN_10)
@@ -31,6 +36,11 @@ uint8_t EEPROM_read(uint16_t memAddr);
 void EEPROM_write(uint16_t memAddr, uint8_t data);
 void I2C_reset(void);
 void PENVENNE_write(uint16_t memAddr, uint8_t data);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* INC_EEPROM_H_ */
 
 

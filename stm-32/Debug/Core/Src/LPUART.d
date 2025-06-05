@@ -1,4 +1,4 @@
-Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
+Core/Src/LPUART.o: ../Core/Src/LPUART.c ../Core/Inc/main.h \
  ../Drivers/CMSIS/Device/ST/STM32L4xx/Include/stm32l4xx.h \
  ../Drivers/CMSIS/Device/ST/STM32L4xx/Include/stm32l4a6xx.h \
  ../Drivers/CMSIS/Include/core_cm4.h \
@@ -23,7 +23,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_flash_ramfunc.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_pwr.h \
  ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_pwr_ex.h \
- ../Core/Inc/EEPROM.h ../Core/Inc/delay.h
+ ../Core/Inc/LPUART.h
 ../Core/Inc/main.h:
 ../Drivers/CMSIS/Device/ST/STM32L4xx/Include/stm32l4xx.h:
 ../Drivers/CMSIS/Device/ST/STM32L4xx/Include/stm32l4a6xx.h:
@@ -49,5 +49,4 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_flash_ramfunc.h:
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_pwr.h:
 ../Drivers/STM32L4xx_HAL_Driver/Inc/stm32l4xx_hal_pwr_ex.h:
-../Core/Inc/EEPROM.h:
-../Core/Inc/delay.h:
+../Core/Inc/LPUART.h:
