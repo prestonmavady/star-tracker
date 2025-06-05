@@ -17,18 +17,10 @@
 #ifndef INC_DELAY_H_
 #define INC_DELAY_H_
 
-#ifdef __cplusplus
-}
-#endif
-
 #include "stm32l4xx_hal.h"
 
 void Delay_init( void );
 void delay_us( const uint32_t time_us );
-
-#ifdef __cplusplus
-}
-#endif
 
 
 #endif

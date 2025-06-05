@@ -2,7 +2,7 @@
 // Each row: { HIP_ID, x, y, z }
 
 #define CATALOG_SIZE 256
-double cat[CATALOG_SIZE][4] = {
+const double cat[CATALOG_SIZE][4] = {
     { 0, 0.87326512, 0.03196827, 0.48619550 },
     { 1, 0.51237873, 0.02050796, 0.85851468 },
     { 2, 0.96348243, 0.05570519, 0.26191322 },

@@ -10,17 +10,17 @@ C_SRCS += \
 ../Core/gv-data/catalog_xyz.c \
 ../Core/gv-data/tab_cat.c 
 
-OBJS += \
-./Core/gv-data/catalog_bytestream.o \
-./Core/gv-data/catalog_luts.o \
-./Core/gv-data/catalog_xyz.o \
-./Core/gv-data/tab_cat.o 
-
 C_DEPS += \
 ./Core/gv-data/catalog_bytestream.d \
 ./Core/gv-data/catalog_luts.d \
 ./Core/gv-data/catalog_xyz.d \
 ./Core/gv-data/tab_cat.d 
+
+OBJS += \
+./Core/gv-data/catalog_bytestream.o \
+./Core/gv-data/catalog_luts.o \
+./Core/gv-data/catalog_xyz.o \
+./Core/gv-data/tab_cat.o 
 
 
 # Each subdirectory must supply rules for building sources it contributes

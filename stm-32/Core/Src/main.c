@@ -1,4 +1,3 @@
-extern "C" {
 #include "main.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,27 +10,24 @@ extern "C" {
 #include "catalog_xyz.h"
 #include "catalog_luts.h"
 #include "catalog_bytestream.h"
-}
-
-// main with C linkage for correct startup symbol
-extern "C" int main(void);
 
 void SystemClock_Config(void);
 double **allocate_matrix(int rows, int cols);
 void free_matrix(double **mat, int rows);
 
-
-extern "C" int main(void) {
+int main(void) {
 	// ------------- SAMPLE STARFIELD IMAGE: -------------
 	// HIP IDs used: 1, 6, 8, 13, 16
 	#define n_stars_img 5
-	double image_centroids[n_stars_img][3] = {
-		{0.51237873, 0.02050796, 0.85851468},  // HIP 1
-		{0.54280261, 0.09694802, 0.83424601},  // HIP 6
-		{0.47423032, 0.11979696, 0.87221230},  // HIP 8
-		{0.38942390, 0.21230918, 0.89625545},  // HIP 13
-		{0.63385529, 0.38047728, 0.67339773},  // HIP 16
-	};
+	// We would take in a list of centroids, calculate their body-frame
+	// unit vector, and then create this image_centrodis[] list
+	// double image_centroids[n_stars_img][3] = {
+	//	{0.51237873, 0.02050796, 0.85851468},  // CENT 1 (HIP 1)
+	//	{0.54280261, 0.09694802, 0.83424601},  // CENT 2 (HIP 6)
+	//	{0.47423032, 0.11979696, 0.87221230},  // CENT 3 (HIP 8)
+	//	{0.38942390, 0.21230918, 0.89625545},  // CENT 4 (HIP 13)
+	//	{0.63385529, 0.38047728, 0.67339773},  // CENT 5 (HIP 16)
+	// };
 	// Image pair angle table [indexA, indexB, angle]
 	int n_image = 10;
 	double **tab_image = allocate_matrix(n_image, 3);

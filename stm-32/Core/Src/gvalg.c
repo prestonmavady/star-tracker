@@ -56,18 +56,21 @@
 //
 // ----------------------------------------------------------
 
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "catalog_luts.h"
 #include "catalog_bytestream.h"
 
-void gvalg(double **cat, double **tab_cat, double **tab_image,
-            int *id, double *v2, int n_image, int n_stars_img) {
-    
-    
+uint8_t setmode(int nums[], int numsize);
+
+void gvalg(const double cat[][4], const double tab_cat[][3], double **tab_image,
+           int *id, double *v2, int n_image, int n_stars_img) {
+
+
     // ---------------- MEMORY ALLOCATION ----------------
-    // allocate k_n - (used in future loops) counts how many 
+    // allocate k_n - (used in future loops) counts how many
     // catalog pairs have been voted for a specific star in the image
     int *k_n = (int *)calloc(n_stars_img, sizeof(int));
 
@@ -83,20 +86,21 @@ void gvalg(double **cat, double **tab_cat, double **tab_image,
     for (int i = 0; i < n_image; i++) { // iterate through all centroids
 
         // find the starting address of the bin (index the current centroid angle into the bin address LUT)
-        int bin_addr = bin_angle_to_address_lut[tab_image[i][2]];
+    	int bin_index = (int)(tab_image[i][2] * 1000); // Or whatever scaling works
+    	int bin_addr = bin_angle_to_address_lut[bin_index];
         // starting index to add a vote to (location of first pair in bin)
         int index_min = (bin_addr + 1);
         // stopping index to add a vote to (location of last pair in bin)
-        int index_max = (bin_addr + bytestream[bin_addr]);
-        
+        int index_max = (bin_addr + catalog_bytestream[bin_addr]);
+
         for (int j = index_min; j <= index_max; j++) {// iterate through all pairs in bin
-                    
-            // in the current container for the centroid i, index into star #1, then go to 
+
+            // in the current container for the centroid i, index into star #1, then go to
             // the next open slots and write the 2 star IDs
             v[(int)tab_image[i][0]][2 * k_n[(int)tab_image[i][0]] + 1] = (int)tab_cat[j][0];
             v[(int)tab_image[i][0]][2 * k_n[(int)tab_image[i][0]] + 2] = (int)tab_cat[j][1];
             k_n[(int)tab_image[i][0]]++;
-            // in the same container, index into star #2, then go to the next open slots and 
+            // in the same container, index into star #2, then go to the next open slots and
             // write the 2 star IDs
             v[(int)tab_image[i][1]][2 * k_n[(int)tab_image[i][1]] + 1] = (int)tab_cat[j][0];
             v[(int)tab_image[i][1]][2 * k_n[(int)tab_image[i][1]] + 2] = (int)tab_cat[j][1];
@@ -116,16 +120,14 @@ void gvalg(double **cat, double **tab_cat, double **tab_image,
         id[i] = setmode(v[i], first_zero);
 
         // Fallback in case of invalid match
-        if (isnan(id[i])) {
-            id[i] = 0;
-        }
+        if (id[i] < 0) id[i] = 0;
     }
 
     // ---------------- SECOND ROUND ----------------
     // Now that stars have been matched, calculate real pairwise
     // angles from catalog to confirm that matches are correct.
     for (int i = 0; i < n_image; i++) {
-        if (tab_image[i][0] != 0 && tab_image[i][1] != 0) {
+    	if (tab_image[i][0] >= 0 && tab_image[i][1] >= 0) {
             int a = id[(int)tab_image[i][0]];
             int b = id[(int)tab_image[i][1]];
 
@@ -139,7 +141,7 @@ void gvalg(double **cat, double **tab_cat, double **tab_image,
                 double d_image = tab_image[i][2];
 
                 // If the real catalog angle is close to the image angle, increase confidence score
-                if (d_image - loc_err < d_cat && d_cat < d_image + loc_err) {
+                if (d_image - 1 < d_cat && d_cat < d_image + 1) {
                     v2[(int)tab_image[i][0]]++;
                     v2[(int)tab_image[i][1]]++;
                 }
@@ -149,29 +151,29 @@ void gvalg(double **cat, double **tab_cat, double **tab_image,
 
     // --- Free dynamically allocated memory ---
     free(k_n);
-    for (int i = 0; i < n_stars_img; i++) {
+    for (int i = 0; i < n_stars_img; i++)
+    {
         free(v[i]);
     }
     free(v);
 }
 
-uint8_t setmode(uint8_t nums[], int numsize){
+uint8_t setmode(int nums[], int numsize){
 	int mode = 0;
-	int counting = 0;
-	int maxcount = 0;
-		
-		for (int i = 0; i < numsize; i++){
-			for (int x = 0; x < numsize; x++){
-				if (nums[i] == nums[x]){
-					counting++;
-				}
-			}
-			if (counting > maxcount){
-				mode = nums[i];
-				maxcount = counting;
-			}
-			counting = 0;
-		}
+    int counting = 0;
+    int maxcount = 0;
+
+    for (int i = 0; i < numsize; i++) {
+        for (int x = 0; x < numsize; x++) {
+            if (nums[i] == nums[x]) {
+                counting++;
+            }
+        }
+        if (counting > maxcount) {
+            mode = nums[i];
+            maxcount = counting;
+        }
+        counting = 0;
+    }
     return mode;
 }
-
