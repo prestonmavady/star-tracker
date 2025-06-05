@@ -110,6 +110,21 @@ with open(unit_vector_file, 'w', newline='') as f:
 
 print(f"\n    ...Parsed {len(unit_vectors)} stars from catalog.")
 
+# WRITE OUT A C FILE: catalog_xyz.c
+xyz_c_file = os.path.join(c_code_output_dir, "catalog_xyz.c")
+with open(xyz_c_file, 'w') as cf:
+    cf.write(f"// catalog_xyz.c - Auto-generated unit vector catalog\n")
+    cf.write(f"// Each row: {{ HIP_ID, x, y, z }}\n\n")
+    cf.write(f"#define CATALOG_SIZE {len(unit_vectors)}\n")
+    cf.write(f"double catalog_xyz[CATALOG_SIZE][4] = {{\n")
+    for hip, vec in unit_vectors:
+        x, y, z = vec
+        index = hip_to_index[hip]
+        cf.write(f"    {{ {index}, {x:.8f}, {y:.8f}, {z:.8f} }},\n")
+    cf.write("};\n")
+print(f"    ...Wrote catalog_xyz.c with {len(unit_vectors)} entries.")
+
+
 # --------------------------------------------------------
 # STEP 2: Generate a List of All Pairwise Angles
 # --------------------------------------------------------
@@ -130,6 +145,20 @@ with open(angle_file, 'w', newline='') as csvf:
     for id1, id2, angle in angle_data:
         writer.writerow([id1, id2, f"{angle:.6f}"])
 print(f"\n    ...Wrote {len(angle_data)} pairwise angles to '{angle_file}'.")
+
+# ── WRITE OUT A C-READY file (tab_cat.c)
+c_file = os.path.join(c_code_output_dir, "tab_cat.c")
+with open(c_file, 'w') as cf:
+    # 1) define N_PAIRS
+    cf.write(f"// Automatically generated on {__import__('datetime').datetime.now().strftime('%Y-%m-%d')}\n")
+    cf.write(f"#include <stddef.h>\n\n")
+    cf.write(f"#define N_PAIRS {len(angle_data)}\n\n")
+    cf.write(f"double pairs[{len(angle_data)}][3] = {{\n")
+    # 2) emit each (ID1, ID2, Angle) as a C initializer
+    for idx1, idx2, angle in angle_data:
+        cf.write(f"    {{ {idx1}, {idx2}, {angle:.6f} }},\n")
+    cf.write("};\n")
+print(f"    ...Wrote C array to '{c_file}'.")
 
 # Track discarded angles
 total_pairs_possible = len(unit_vectors) * (len(unit_vectors) - 1) // 2
