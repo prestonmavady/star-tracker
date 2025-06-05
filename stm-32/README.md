@@ -16,7 +16,7 @@ spi.c
  - SPI_init
  - SPI_rx
 eeprom.c
- - eeprom_init
+ - eeprom_init (init + WP pin GPIO enable)
  - eeprom_flash
  - eeprom_check
  - eeprom_write

@@ -1,0 +1,5 @@
+../Core/Src/eeprom.c:25:6:EEPROM_init	4	static
+../Core/Src/eeprom.c:64:6:EEPROM_write	16	static
+../Core/Src/eeprom.c:81:6:PENVENNE_write	16	static
+../Core/Src/eeprom.c:105:9:EEPROM_read	24	static
+../Core/Src/eeprom.c:140:6:I2C_reset	4	static

@@ -52,9 +52,10 @@ os.makedirs(c_code_output_dir, exist_ok=True)
 
 # Output file names
 catalog_file = '1_catalog_ra_dec.csv'
-unit_vector_file = '2_catalog_x_y_z.csv'
-binned_file = '3_binned_catalog.csv'
-memory_map_file = "4_eeprom_memory_map.txt"
+angle_file = '2_pairwise_angles.csv'
+unit_vector_file = '3_catalog_x_y_z.csv'
+binned_file = '4_binned_catalog.csv'
+memory_map_file = "5_eeprom_memory_map.txt"
 
 # Defines for binning section
 BIN_COUNT = 840
@@ -121,6 +122,14 @@ for i in range(len(unit_vectors)):
         angle_deg = np.degrees(np.arccos(dot))
         if angle_deg <= BIN_COUNT * BIN_WIDTH:
             angle_data.append((hip1, hip2, angle_deg))
+
+# ── WRITE OUT A CSV FOR ALL PAIRWISE ANGLES 
+with open(angle_file, 'w', newline='') as csvf:
+    writer = csv.writer(csvf)
+    writer.writerow(['ID1', 'ID2', 'Angle_deg'])
+    for id1, id2, angle in angle_data:
+        writer.writerow([id1, id2, f"{angle:.6f}"])
+print(f"\n    ...Wrote {len(angle_data)} pairwise angles to '{angle_file}'.")
 
 # Track discarded angles
 total_pairs_possible = len(unit_vectors) * (len(unit_vectors) - 1) // 2
