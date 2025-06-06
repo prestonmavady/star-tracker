@@ -8,7 +8,7 @@
 #define USERLED_PIN       7
 
 // FUNCTIONS:
-void userled_init(void);
+void Userled_init(void);
 void userled_set(uint8_t enable);
 
 #endif /* INC_USERLED_H_ */

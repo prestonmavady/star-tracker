@@ -1,6 +1,6 @@
 #include <userled.h>
 
-void userled_init(void)
+void Userled_init(void)
 {
     // Enable GPIOC clock
     RCC->AHB2ENR |= RCC_AHB2ENR_GPIOCEN;

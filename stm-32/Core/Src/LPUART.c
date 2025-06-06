@@ -1,3 +1,7 @@
+// For Mac: Connect to LPUART via terminal using:
+// ls /dev/cu.*
+// screen /dev/cu.usbmodem[#####] 115200
+
 #include "main.h"
 #include "stm32l4xx_hal.h"
 #include "LPUART.h"
@@ -30,7 +34,7 @@ void LPUART_Config (void){
   LPUART1->CR1 |= USART_CR1_RXNEIE;        // enable LPUART1 recv interrupt
   LPUART1->ISR &= ~(USART_ISR_RXNE);       // clear Recv-Not-Empty flag
   /* USER: set baud rate register (LPUART1->BRR) */
-  LPUART1->BRR = 8889;
+  LPUART1->BRR = 8899;
   NVIC->ISER[2] = (1 << (LPUART1_IRQn & 0x1F));   // enable LPUART1 ISR
   __enable_irq();                          // enable global interrupts
 }

@@ -60,6 +60,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include "LPUART.h"
 #include "catalog_luts.h"
 #include "catalog_bytestream.h"
 
@@ -81,47 +82,97 @@ void gvalg(const double cat[][4], const double tab_cat[][3], double **tab_image,
         v[i] = (int *)calloc(512, sizeof(int));  // Enough space for 256 pairs (2 votes per pair)
     }
 
-    // ---------------- FIRST ROUND ----------------
-    // Go through all centroids and append star IDs w/ same angle
-    for (int i = 0; i < n_image; i++) { // iterate through all centroids
 
-        // find the starting address of the bin (index the current centroid angle into the bin address LUT)
-    	int bin_index = (int)(tab_image[i][2] * 1000); // Or whatever scaling works
+    // ---------------- FIRST ROUND ----------------
+    // for each centroid pair from the image (each entry in tab_image[i][3]
+    for (int i = 0; i < n_image; i++) {
+
+    	// store the angle of the current pair (in millidegrees
+    	int angle = tab_image[i][2];
+        // find the starting address of the bin (milidegrees/100 - i.e. 84000/100 = 840)
+    	int bin_index = (int)(angle/100);
     	int bin_addr = bin_angle_to_address_lut[bin_index];
         // starting index to add a vote to (location of first pair in bin)
         int index_min = (bin_addr + 1);
         // stopping index to add a vote to (location of last pair in bin)
         int index_max = (bin_addr + catalog_bytestream[bin_addr]);
 
-        for (int j = index_min; j <= index_max; j++) {// iterate through all pairs in bin
 
-            // in the current container for the centroid i, index into star #1, then go to
-            // the next open slots and write the 2 star IDs
-            v[(int)tab_image[i][0]][2 * k_n[(int)tab_image[i][0]] + 1] = (int)tab_cat[j][0];
-            v[(int)tab_image[i][0]][2 * k_n[(int)tab_image[i][0]] + 2] = (int)tab_cat[j][1];
-            k_n[(int)tab_image[i][0]]++;
-            // in the same container, index into star #2, then go to the next open slots and
-            // write the 2 star IDs
-            v[(int)tab_image[i][1]][2 * k_n[(int)tab_image[i][1]] + 1] = (int)tab_cat[j][0];
-            v[(int)tab_image[i][1]][2 * k_n[(int)tab_image[i][1]] + 2] = (int)tab_cat[j][1];
-            k_n[(int)tab_image[i][1]]++;
+
+        // --- DEBUG 1 DEBUG 1 DEBUG 1 DEBUG 1 ---
+        char dbg[256];
+
+        // Print image pair and angle
+        snprintf(dbg, sizeof(dbg), "\n[DEBUG] Image Pair %d: centroid (%d, %d), angle = %d\r\n",
+                 i, (int)tab_image[i][0], (int)tab_image[i][1], angle);
+        LPUART_Print(dbg);
+
+        // Print bin info
+        snprintf(dbg, sizeof(dbg), "         → bin_index = %d, bin_addr = %d\r\n", bin_index, bin_addr);
+        LPUART_Print(dbg);
+        snprintf(dbg, sizeof(dbg), "         → index_min = %d, index_max = %d\r\n", index_min, index_max);
+        LPUART_Print(dbg);
+        // ------------------------------------
+
+
+        for (int j = index_min; j <= index_max + 4; j++) {// iterate through all pairs in bin
+
+        	int idx0 = (int)tab_image[i][0];
+        	int idx1 = (int)tab_image[i][1];
+
+        	// Vote for star A
+        	v[idx0][2 * k_n[idx0] + 0] = (int)catalog_bytestream[j];
+        	v[idx0][2 * k_n[idx0] + 1] = (int)catalog_bytestream[j+1];
+
+        	// Vote for star B
+        	v[idx1][2 * k_n[idx1] + 0] = (int)catalog_bytestream[j];
+        	v[idx1][2 * k_n[idx1] + 1] = (int)catalog_bytestream[j+1];
+
+            // --- DEBUG 2 DEBUG 2 DEBUG 2 DEBUG 2 ---
+            // Vote print for tab_image[i][0]
+            snprintf(dbg, sizeof(dbg), "         → VOTE[%d] += (%d, %d)\r\n",
+            (int)tab_image[i][0], v[idx1][2 * k_n[idx1] + 0], v[idx0][2 * k_n[idx0] + 1]);
+            LPUART_Print(dbg);
+
+            // Vote print for tab_image[i][1]
+            snprintf(dbg, sizeof(dbg), "         → VOTE[%d] += (%d, %d)\r\n",
+            (int)tab_image[i][1], v[idx1][2 * k_n[idx1] + 0], v[idx1][2 * k_n[idx1] + 1]);
+            LPUART_Print(dbg);
+            delay_us(200000);
+            // ------------------------------------
+
+
+        	// Now increment vote counters
+        	k_n[idx0]++;
+        	k_n[idx1]++;
+        	j+=1;
         }
     }
 
+    LPUART_Print(" \r\n");
+    for (int i = 0; i < n_stars_img; i++) {
+        char buf[128];
+        sprintf(buf, "Centroid %d received %d votes\r\n", i, k_n[i] * 2);
+        LPUART_Print(buf);
+    }
+
+
     // -*-*-----*-*- count votes -*-*------*-*-
     for (int i = 0; i < n_stars_img; i++) {
-        int first_zero = 0;
-        // Count how many votes were cast (find the first zero as end marker)
-        while (v[i][first_zero] != 0) {
-            first_zero++;
-        }
-
-        // Choose the most frequent catalog ID as the identified star
-        id[i] = setmode(v[i], first_zero);
+    	int vote_count = k_n[i] * 2;  // Each pair adds 2 votes
+    	id[i] = setmode(v[i], vote_count);
 
         // Fallback in case of invalid match
         if (id[i] < 0) id[i] = 0;
     }
+
+    LPUART_Print(" \r\n");
+    for (int i = 0; i < n_stars_img; i++) {
+        char buf[128];
+        sprintf(buf, "Centroid %d assigned HIP ID %d\r\n", i, id[i]);
+        LPUART_Print(buf);
+    }
+
 
     // ---------------- SECOND ROUND ----------------
     // Now that stars have been matched, calculate real pairwise
@@ -134,17 +185,25 @@ void gvalg(const double cat[][4], const double tab_cat[][3], double **tab_image,
             // Check that both centroids were successfully ID'd
             if (a != 0 && b != 0) {
                 // Calculate catalog angle between identified stars
-                double d_cat = acos(cat[a][1] * cat[b][1] +
-                                    cat[a][2] * cat[b][2] +
-                                    cat[a][3] * cat[b][3]);
+            	int a_idx = -1, b_idx = -1;
+            	for (int j = 0; j < 256; j++) {
+            	    if ((int)cat[j][0] == a) a_idx = j;
+            	    if ((int)cat[j][0] == b) b_idx = j;
+            	}
 
-                double d_image = tab_image[i][2];
+            	if (a_idx >= 0 && b_idx >= 0) {
+            	    double d_cat = acos(cat[a_idx][1] * cat[b_idx][1] +
+            	                        cat[a_idx][2] * cat[b_idx][2] +
+            	                        cat[a_idx][3] * cat[b_idx][3]);
 
-                // If the real catalog angle is close to the image angle, increase confidence score
-                if (d_image - 1 < d_cat && d_cat < d_image + 1) {
-                    v2[(int)tab_image[i][0]]++;
-                    v2[(int)tab_image[i][1]]++;
-                }
+            	    double d_image = tab_image[i][2];
+
+            	    if (fabs(d_cat - d_image) < 1) {
+            	        v2[(int)tab_image[i][0]]++;
+            	        v2[(int)tab_image[i][1]]++;
+            	    }
+            	}
+
             }
         }
     }

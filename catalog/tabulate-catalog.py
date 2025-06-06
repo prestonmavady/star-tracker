@@ -189,7 +189,6 @@ with open(binned_file, 'w', newline='') as f:
         for idx1, idx2 in contents:
             writer.writerow([idx1, idx2])
         writer.writerow([])
-        writer.writerow([])
 
 # --------------------------------------------------------
 # STEP 4: Generate EEPROM Bytestream
@@ -304,20 +303,43 @@ with open(os.path.join(c_code_output_dir, "catalog_bytestream.h"), 'w') as f:
     f.write("extern const size_t bytestream_len;\n\n")
     f.write("#endif // CATALOG_BYTESTREAM_H\n")
 
+# ----- write catalog_bytestream.c -----
+bytestream_file = "catalog_bytestream.c"
+PAIR_SIZE = 2
+catalog_bytestream = []
+bin_angle_to_address_lut = []
+
+address_counter = 0
 with open(os.path.join(c_code_output_dir, "catalog_bytestream.c"), 'w') as f:
-    f.write("// catalog_bytestream.c - EEPROM data array for flashing\n\n")
-    f.write('#include <stdint.h>\n\n')
+    f.write("// AUTO-GENERATED BINARY CATALOG\n\n")
+    f.write("const uint8_t catalog_bytestream[] = {\n")
 
-    f.write("const uint8_t catalog_bytestream[] = {\n    ")
-    for i, byte in enumerate(bytestream):
-        f.write(f"0x{byte:02X}")
-        if i != len(bytestream) - 1:
-            f.write(", ")
-        if (i + 1) % 16 == 0:
-            f.write("\n    ")
+    for bin_index, contents in enumerate(binned):
+        num_pairs = len(contents)
+        bin_angle_to_address_lut.append(address_counter)
+
+        # Start line with number of pairs
+        line_bytes = [num_pairs]
+        address_counter += 1
+
+        for idx1, idx2 in contents:
+            line_bytes.extend([idx1 & 0xFF, idx2 & 0xFF])
+            address_counter += 2
+
+        # Write the line in hex with bin comment
+        hex_bytes = ", ".join(f"0x{b:02X}" for b in line_bytes)
+        f.write(f"  {hex_bytes}, // BIN {bin_index}: {num_pairs} pair{'s' if num_pairs != 1 else ''}\n")
+
+    f.write("};\n\n")
+
+    # Write the LUT
+    f.write("const uint16_t bin_angle_to_address_lut[] = {\n")
+    for i, addr in enumerate(bin_angle_to_address_lut):
+        f.write(f"  0x{addr:04X},")
+        if (i + 1) % 8 == 0:
+            f.write("\n")
     f.write("\n};\n")
-    f.write(f"const size_t bytestream_len = sizeof(catalog_bytestream);\n")
-
+    
 # --------------------------------------------------------
 # STEP 7: Output Visual EEPROM Memory Map (as a text file)
 # --------------------------------------------------------

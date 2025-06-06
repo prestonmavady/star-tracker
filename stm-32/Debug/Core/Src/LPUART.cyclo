@@ -1,4 +1,4 @@
-../Core/Src/LPUART.c:6:6:LPUART_Config	1
-../Core/Src/LPUART.c:39:6:LPUART_Print	3
-../Core/Src/LPUART.c:50:6:LPUART1_IRQHandler	9
-../Core/Src/LPUART.c:83:6:LPUART_Send_ESC_Seq	1
+../Core/Src/LPUART.c:10:6:LPUART_Config	1
+../Core/Src/LPUART.c:43:6:LPUART_Print	3
+../Core/Src/LPUART.c:54:6:LPUART1_IRQHandler	9
+../Core/Src/LPUART.c:87:6:LPUART_Send_ESC_Seq	1
